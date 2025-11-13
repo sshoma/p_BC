@@ -1,0 +1,62 @@
+buildscript {
+
+    // shared repository definition
+    ext.igRepositories = {
+        //mavenLocal()
+        mavenCentral()
+
+        maven {
+            url project.hasProperty('igArtifactRepoUrl') ? project.igArtifactRepoUrl : System.getenv('IG_ARTIFACT_REPO_URL')
+            credentials {
+                username project.hasProperty('igArtifactRepoUsername') ? project.igArtifactRepoUsername : System.getenv('IG_ARTIFACT_REPO_USERNAME')
+                password project.hasProperty('igArtifactRepoPassword') ? project.igArtifactRepoPassword : System.getenv('IG_ARTIFACT_REPO_PASSWORD')
+            }
+
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+
+        maven {
+            url project.hasProperty('igEdgeNodeUrl') ? project.igEdgeNodeUrl : System.getenv('IG_EDGE_NODE_URL')
+            credentials {
+                username project.hasProperty('igEdgeNodeUsername') ? project.igEdgeNodeUsername : System.getenv('IG_EDGE_NODE_USERNAME')
+                password project.hasProperty('igEdgeNodePassword') ? project.igEdgeNodePassword : System.getenv('IG_EDGE_NODE_PASSWORD')
+            }
+
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+
+    }
+
+    repositories igRepositories
+
+    dependencies {
+        classpath platform("com.guidewire.integrationgateway:integration-gateway-bom:${integrationGatewayVersion}")
+        classpath "com.guidewire.integrationgateway:integration-gradle-plugin"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+apply from: "gradle/integration-config.gradle"
+
+group 'com.guidewire.integrationgateway'
+version applicationVersion
+
+repositories igRepositories
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.6'
+    compileOnly 'com.google.code.findbugs:annotations:3.0.1'
+}
+
+test {
+    useJUnitPlatform() {
+        excludeTags "Integration"
+    }
+}
